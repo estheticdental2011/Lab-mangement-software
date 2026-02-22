@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dental Lab Case Management System - v1.4</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { text-align: center; color: #333; margin-bottom: 20px; }
+        h2 { color: #333; margin-bottom: 16px; font-size: 18px; }
+        h3 { color: #555; margin-bottom: 12px; font-size: 14px; }
+        .form-card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 24px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+        .form-group { display: flex; flex-direction: column; }
+        label { font-size: 14px; font-weight: 600; color: #555; margin-bottom: 6px; }
+        input, select { padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; transition: border-color 0.2s; }
+        input:focus, select:focus { outline: none; border-color: #007bff; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #545b62; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-delete { background: #dc3545; color: white; padding: 6px 12px; font-size: 12px; }
+        .btn-add { background: #28a745; color: white; padding: 8px 16px; font-size: 14px; }
+        .table-card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; font-weight: 600; color: #333; font-size: 11px; }
+        tr:hover { background: #f8f9fa; }
+        .search-bar { margin-bottom: 16px; }
+        .search-bar input { width: 100%; padding: 12px; }
+        .work-items-section { margin-top: 20px; padding-top: 20px; border-top: 2px solid #eee; }
+        .work-item { background: #f8f9fa; padding: 16px; border-radius: 8px; margin-bottom: 12px; position: relative; }
+        .work-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .work-item-title { font-weight: 600; color: #333; }
+        .work-item .form-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+        .work-item .btn-delete { position: absolute; top: 10px; right: 10px; }
+        .custom-params { grid-column: 1 / -1; margin-top: 12px; padding: 12px; background: white; border-radius: 8px; }
+        .custom-params-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+        .price-display { font-size: 14px; color: #28a745; font-weight: 600; margin-top: 8px; }
+        .tab-buttons { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab-btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: #e9ecef; color: #333; }
+        .tab-btn.active { background: #007bff; color: white; }
+        .hidden { display: none; }
+        .order-total { font-size: 18px; font-weight: bold; color: #28a745; text-align: right; margin-top: 16px; padding: 12px; background: #e8f5e9; border-radius: 8px; }
+        .settings-row { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px; }
+        .invoice-preview { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 20px; }
+        .invoice-doc { max-width: 800px; margin: 0 auto; padding: 40px; border: 1px solid #ddd; }
+        .invoice-doc-header { display: flex; justify-content: space-between; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 20px; }
+        .invoice-doc-title { font-size: 28px; font-weight: bold; }
+        .invoice-doc-info { text-align: right; font-size: 12px; }
+        .invoice-doc-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 20px; }
+        .invoice-doc-party { border: 1px solid #ddd; padding: 15px; border-radius: 8px; }
+        .invoice-doc-party h4 { margin-bottom: 8px; color: #333; font-size: 12px; }
+        .invoice-doc-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .invoice-doc-table th { background: #f0f0f0; border: 1px solid #ddd; padding: 10px; text-align: center; }
+        .invoice-doc-table td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        .invoice-doc-table td.text-left { text-align: left; }
+        .invoice-doc-summary { text-align: right; }
+        .invoice-doc-summary div { margin-bottom: 5px; }
+        .invoice-doc-summary .total { font-size: 18px; font-weight: bold; }
+        .search-results { max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; margin-top: 8px; }
+        .search-result-item { padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; }
+        .search-result-item:hover { background: #f0f8ff; }
+        .search-result-item:last-child { border-bottom: none; }
+        .case-seq { font-weight: bold; color: #007bff; }
+        .status-completed { color: #28a745; font-size: 18px; }
+        .status-delayed { color: #dc3545; font-size: 18px; }
+        .status-pending { color: #ffc107; font-size: 18px; }
+        .completion-checkbox { width: 18px; height: 18px; cursor: pointer; margin-right: 8px; }
+        .tech-capacity { font-size: 11px; color: #666; }
+        .tech-at-capacity { color: #dc3545; font-weight: bold; }
+        .tech-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 4px; }
+        .tech-badge-ok { background: #d4edda; color: #155724; }
+        .tech-badge-full { background: #f8d7da; color: #721c24; }
+        .collection-summary { margin-top: 30px; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .collection-summary h3 { margin-bottom: 16px; }
+        .clinic-collection-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; }
+        .clinic-collection-item:last-child { border-bottom: none; }
+        .clinic-collection-item .clinic-name { font-weight: 600; }
+        .clinic-collection-item .clinic-amount { color: #28a745; font-weight: bold; }
+        .collection-paid { color: #28a745; }
+        .collection-unpaid { color: #dc3545; font-weight: bold; }
+        .collection-overdue { background-color: #ffebee; }
+        .collection-checkbox { width: 18px; height: 18px; }
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            table { font-size: 10px; }
+            th, td { padding: 6px 3px; }
+            .hide-mobile { display: none; }
+            .invoice-doc-parties { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🦷 Dental Lab Case Management</h1>
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="showTab('case')">Case Management</button>
+            <button class="tab-btn" onclick="showTab('invoice')">Generate Invoice</button>
+            <button class="tab-btn" onclick="showTab('technicians')">👥 Technicians</button>
+            <button class="tab-btn" onclick="showTab('settings')">⚙️ Work Types</button>
+        </div>
+        
+        <!-- Case Management Tab -->
+        <div id="caseTab">
+            <div class="form-card">
+                <div class="form-grid">
+                    <div class="form-group"><label>Case #</label><input type="text" id="caseSeq" readonly style="background:#f0f0f0;"></div>
+                    <div class="form-group"><label>Date (日期)</label><input type="date" id="caseDate"></div>
+                    <div class="form-group"><label>Clinic Name (診所名稱)</label><input type="text" id="clinicName" placeholder="Clinic Name"></div>
+                    <div class="form-group"><label>Doctor Name (醫師姓名)</label><input type="text" id="doctorName" placeholder="Doctor Name"></div>
+                    <div class="form-group"><label>Technician (負責技師)</label><select id="technicianName" onchange="checkTechnicianCapacity()"><option value="">Select...</option></select></div>
+                    <div class="form-group"><label>Received Date (收件日期)</label><input type="date" id="receivedDate" onchange="updateAllWorkItemDates()"></div>
+                </div>
+                <div class="work-items-section">
+                    <h2>Work Items (工件) <button class="btn btn-add" onclick="addWorkItem()">➕ Add Work Item</button></h2>
+                    <div id="workItemsContainer"></div>
+                </div>
+                <div class="form-grid" style="margin-top:20px;">
+                    <div class="form-group"><label>Arrival Date (送達診所日期)</label><input type="date" id="arrivalDate"></div>
+                    <div class="form-group"><label>Logistics (物流公司)</label><input type="text" id="logistics" placeholder="Courier Company"></div>
+                    <div class="form-group"><label>Tracking Code</label><input type="text" id="trackingCode" placeholder="Tracking Number"></div>
+                </div>
+                <div class="order-total" id="orderTotal">Order Total: $0</div>
+                <button class="btn btn-primary" onclick="addCase()">➕ Add Case</button>
+            </div>
+            <div class="table-card">
+                <div class="search-bar"><input type="text" id="searchInput" placeholder="🔍 Search..." oninput="renderTable()"></div>
+                <table>
+                    <thead><tr><th>Case #</th><th>Date</th><th>Clinic</th><th>Doctor</th><th>Tech.</th><th>Work Items</th><th class="hide-mobile">Total</th><th>Received</th><th>Complete</th><th>Status</th><th>Ship</th><th>Arrive</th><th class="hide-mobile">Logistics</th><th>Action</th></tr></thead>
+                    <tbody id="caseTable"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Invoice Tab -->
+        <div id="invoiceTab" class="hidden">
+            <div class="form-card">
+                <h2>Generate Invoice (生成發票)</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Search Case # or Clinic Name (搜尋案件)</label>
+                        <input type="text" id="invoiceSearch" placeholder="Enter case# or clinic name..." oninput="searchCasesForInvoice()">
+                        <div class="search-results" id="searchResults"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Selected Case (已選案件)</label>
+                        <input type="text" id="selectedCaseInfo" readonly style="background:#f0f0f0;">
+                        <input type="hidden" id="selectedCaseId">
+                    </div>
+                </div>
+                <div class="form-grid" style="margin-top:16px;">
+                    <div class="form-group">
+                        <label>Invoice Date (發票日期)</label>
+                        <input type="date" id="invoiceDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Invoice Number (發票編號)</label>
+                        <input type="text" id="invoiceNo" placeholder="INV-001">
+                    </div>
+                </div>
+                <div class="form-grid" style="margin-top:16px;">
+                    <div class="form-group">
+                        <label>Bill To - Clinic Name (收款診所)</label>
+                        <input type="text" id="billTo" placeholder="Clinic Name">
+                    </div>
+                    <div class="form-group">
+                        <label>Bill To - Address (診所地址)</label>
+                        <input type="text" id="billToAddress" placeholder="Address">
+                    </div>
+                </div>
+                <div class="form-grid" style="margin-top:16px;">
+                    <div class="form-group">
+                        <label>From - Lab Name (技工所名稱)</label>
+                        <input type="text" id="fromName" placeholder="Lab Name">
+                    </div>
+                    <div class="form-group">
+                        <label>From - Address (技工所地址)</label>
+                        <input type="text" id="fromAddress" placeholder="Address">
+                    </div>
+                </div>
+                <div class="form-grid" style="margin-top:16px;">
+                    <div class="form-group">
+                        <label>Payment Info (振込資訊)</label>
+                        <input type="text" id="paymentInfo" placeholder="Bank name, Account number...">
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top:20px;" onclick="generateInvoice()">Generate Invoice</button>
+                <button class="btn btn-secondary" style="margin-top:20px;margin-left:10px;" onclick="printInvoice()">🖨️ Print</button>
+            </div>
+            
+            <div class="invoice-preview" id="invoicePreview" style="display:none;">
+                <div class="invoice-doc" id="invoiceDoc"></div>
+            </div>
+            
+            <!-- Collection Summary Section -->
+            <div class="collection-summary" id="collectionSummary">
+                <h3>📋 請款細項 (Collection Summary)</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>從 (From Date)</label>
+                        <input type="date" id="collectionFromDate">
+                    </div>
+                    <div class="form-group">
+                        <label>到 (To Date)</label>
+                        <input type="date" id="collectionToDate">
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-primary" onclick="generateCollectionSummary()">🔍 生成細項 (Generate)</button>
+                    </div>
+                </div>
+                <div id="collectionResults" style="margin-top:20px;"></div>
+            </div>
+        </div>
+        
+        <!-- Technicians Tab -->
+        <div id="techniciansTab" class="hidden">
+            <div class="form-card">
+                <h2>Technicians Database (技師資料庫)</h2>
+                <p style="margin-bottom:16px;color:#666;font-size:14px;">Manage technicians with their case capacity and commission rate.</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Technician Name (技師姓名)</label>
+                        <input type="text" id="newTechName" placeholder="e.g., John Smith">
+                    </div>
+                    <div class="form-group">
+                        <label>Max Cases (最大案件數)</label>
+                        <input type="number" id="newTechMaxCases" placeholder="e.g., 10" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Commission % (佣金百分比)</label>
+                        <input type="number" id="newTechCommission" placeholder="e.g., 15" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-success" onclick="addTechnician()">➕ Add</button>
+                    </div>
+                </div>
+                <h3 style="margin-top:24px;">Current Technicians (目前技師)</h3>
+                <table>
+                    <thead><tr><th>Name (姓名)</th><th>Max Cases (最大案件)</th><th>Current (目前)</th><th>Capacity (容量)</th><th>Commission (佣金%)</th><th>Action</th></tr></thead>
+                    <tbody id="techniciansTable"></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Settings Tab -->
+        <div id="settingsTab" class="hidden">
+            <div class="form-card">
+                <h2>Work Types Configuration (工件類型設定)</h2>
+                <p style="margin-bottom:16px;color:#666;font-size:14px;">Add custom work types with your own days and prices.</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Work Type Name (工件名稱)</label>
+                        <input type="text" id="newWorkTypeName" placeholder="e.g., Zirconia Crown">
+                    </div>
+                    <div class="form-group">
+                        <label>Days to Complete (天數)</label>
+                        <input type="number" id="newWorkTypeDays" placeholder="e.g., 3" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Price (價格)</label>
+                        <input type="number" id="newWorkTypePrice" placeholder="e.g., 4000">
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-success" onclick="addWorkType()">➕ Add</button>
+                    </div>
+                </div>
+                <h3 style="margin-top:24px;">Current Work Types (目前設定)</h3>
+                <table>
+                    <thead><tr><th>Work Type (工件類型)</th><th>Days (天數)</th><th>Price (價格)</th><th>Action</th></tr></thead>
+                    <tbody id="workTypesTable"></tbody>
+                </table>
+            </div>
+        </div>
+        
+    </div>
+
+    <script>
+        // Data storage
+        // Data storage
+        let cases = JSON.parse(localStorage.getItem('dentalCases')) || [];
+        let workTypes = JSON.parse(localStorage.getItem('workTypes')) || [
+            { name: 'PMMA', days: 3, price: 300 },
+            { name: 'Zirconia Crown', days: 3, price: 4000 },
+            { name: 'Implant Crown', days: 3, price: 4000 },
+            { name: 'Custom Abutment', days: 4, price: 3500 },
+            { name: 'Temporary Crown', days: 3, price: 300 },
+            { name: 'Surgical Guide', days: 4, price: 3000 }
+        ];
+        let technicians = JSON.parse(localStorage.getItem('technicians')) || [];
+        let workItemCounter = 0;
+        
+        // Save functions
+        function saveData() { localStorage.setItem('dentalCases', JSON.stringify(cases)); }
+        function saveWorkTypes() { localStorage.setItem('workTypes', JSON.stringify(workTypes)); }
+        function saveTechnicians() { localStorage.setItem('technicians', JSON.stringify(technicians)); }
+        
+        // Technician functions
+        function addTechnician() {
+            const name = document.getElementById('newTechName').value.trim();
+            const maxCases = parseInt(document.getElementById('newTechMaxCases').value);
+            const commission = parseFloat(document.getElementById('newTechCommission').value);
+            
+            if (!name || !maxCases || isNaN(commission)) { alert('Please fill in all fields'); return; }
+            
+            const existing = technicians.find(t => t.name === name);
+            if (existing) { alert('This technician already exists. Delete it first to update.'); return; }
+            
+            technicians.push({ name, maxCases, commission });
+            saveTechnicians();
+            renderTechniciansTable();
+            
+            document.getElementById('newTechName').value = '';
+            document.getElementById('newTechMaxCases').value = '';
+            document.getElementById('newTechCommission').value = '';
+            
+            updateTechnicianDropdown();
+        }
+        
+        function deleteTechnician(index) {
+            if (confirm('Delete this technician?')) {
+                technicians.splice(index, 1);
+                saveTechnicians();
+                renderTechniciansTable();
+                updateTechnicianDropdown();
+            }
+        }
+        
+        function getTechnicianCaseCount(techName) {
+            return cases.filter(c => c.technicianName === techName && !c.completed).length;
+        }
+        
+        function renderTechniciansTable() {
+            const tbody = document.getElementById('techniciansTable');
+            tbody.innerHTML = technicians.map((t, i) => {
+                const currentCount = getTechnicianCaseCount(t.name);
+                const isAtCapacity = currentCount >= t.maxCases;
+                const capacityClass = isAtCapacity ? 'tech-badge-full' : 'tech-badge-ok';
+                const capacityText = isAtCapacity ? 'FULL' : 'OK';
+                return '<tr><td>' + t.name + '</td><td>' + t.maxCases + '</td><td>' + currentCount + '</td><td><span class="tech-badge ' + capacityClass + '">' + capacityText + '</span></td><td>' + t.commission + '%</td><td><button class="btn btn-delete" onclick="deleteTechnician(' + i + ')">Delete</button></td></tr>';
+            }).join('');
+        }
+        
+        function updateTechnicianDropdown() {
+            const select = document.getElementById('technicianName');
+            if (!select) return;
+            const currentVal = select.value;
+            let html = '<option value="">Select...</option>';
+            technicians.forEach(t => {
+                const count = getTechnicianCaseCount(t.name);
+                const disabled = count >= t.maxCases ? 'disabled' : '';
+                html += '<option value="' + t.name + '" ' + disabled + '>' + t.name + ' (' + count + '/' + t.maxCases + ')</option>';
+            });
+            select.innerHTML = html;
+            if (currentVal) select.value = currentVal;
+        }
+        
+        function getTechnicianCommission(techName) {
+            const tech = technicians.find(t => t.name === techName);
+            return tech ? tech.commission : 0;
+        }
+        
+        function checkTechnicianCapacity() {
+            const techName = document.getElementById('technicianName').value;
+            if (!techName) return;
+            const tech = technicians.find(t => t.name === techName);
+            const count = getTechnicianCaseCount(techName);
+            if (tech && count >= tech.maxCases) {
+                alert('⚠️ Warning: ' + techName + ' is at maximum capacity (' + count + '/' + tech.maxCases + ' cases)!');
+            }
+        }
+        
+        // Migrate old cases
+        cases.forEach(c => { 
+            if (c.completed === undefined) c.completed = false; 
+            if (c.collected === undefined) c.collected = false;
+            if (c.collectionDate === undefined) c.collectionDate = null;
+        });
+        saveData();
+        
+        // Initialize form dates
+        document.getElementById('caseDate').valueAsDate = new Date();
+        document.getElementById('receivedDate').valueAsDate = new Date();
+        document.getElementById('invoiceDate').valueAsDate = new Date();
+        
+        // Set default collection dates (first and last day of current month)
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        document.getElementById('collectionFromDate').valueAsDate = firstDay;
+        document.getElementById('collectionToDate').valueAsDate = lastDay;
+        
+        // Get next sequence number
+        function getNextSeq() {
+            const year = new Date().getFullYear();
+            const yearCases = cases.filter(c => c.caseSeq && c.caseSeq.startsWith(year));
+            const maxSeq = yearCases.reduce((max, c) => {
+                const num = parseInt(c.caseSeq.split('-')[1] || 0);
+                return num > max ? num : max;
+            }, 0);
+            return year + '-' + String(maxSeq + 1).padStart(4, '0');
+        }
+        
+        // Tab switching
+        function showTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            if (tab === 'case') {
+                document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+                document.getElementById('caseTab').classList.remove('hidden');
+                document.getElementById('invoiceTab').classList.add('hidden');
+                document.getElementById('techniciansTab').classList.add('hidden');
+                document.getElementById('settingsTab').classList.add('hidden');
+                document.getElementById('caseSeq').value = getNextSeq();
+            } else if (tab === 'invoice') {
+                document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+                document.getElementById('caseTab').classList.add('hidden');
+                document.getElementById('invoiceTab').classList.remove('hidden');
+                document.getElementById('techniciansTab').classList.add('hidden');
+                document.getElementById('settingsTab').classList.add('hidden');
+                document.getElementById('invoiceSearch').value = '';
+                document.getElementById('searchResults').innerHTML = '';
+                document.getElementById('selectedCaseInfo').value = '';
+                document.getElementById('selectedCaseId').value = '';
+            } else if (tab === 'technicians') {
+                document.querySelector('.tab-btn:nth-child(3)').classList.add('active');
+                document.getElementById('caseTab').classList.add('hidden');
+                document.getElementById('invoiceTab').classList.add('hidden');
+                document.getElementById('techniciansTab').classList.remove('hidden');
+                document.getElementById('settingsTab').classList.add('hidden');
+                renderTechniciansTable();
+            } else {
+                document.querySelector('.tab-btn:nth-child(4)').classList.add('active');
+                document.getElementById('caseTab').classList.add('hidden');
+                document.getElementById('invoiceTab').classList.add('hidden');
+                document.getElementById('techniciansTab').classList.add('hidden');
+                document.getElementById('settingsTab').classList.remove('hidden');
+                renderWorkTypesTable();
+            }
+        }
+        
+        // Work Types Settings
+        function addWorkType() {
+            const name = document.getElementById('newWorkTypeName').value.trim();
+            const days = parseInt(document.getElementById('newWorkTypeDays').value);
+            const price = parseInt(document.getElementById('newWorkTypePrice').value);
+            
+            if (!name || !days || !price) { alert('Please fill in all fields'); return; }
+            
+            const existing = workTypes.find(wt => wt.name === name);
+            if (existing) { alert('This work type already exists. Delete it first to update.'); return; }
+            
+            workTypes.push({ name, days, price });
+            saveWorkTypes();
+            renderWorkTypesTable();
+            
+            document.getElementById('newWorkTypeName').value = '';
+            document.getElementById('newWorkTypeDays').value = '';
+            document.getElementById('newWorkTypePrice').value = '';
+        }
+        
+        function deleteWorkType(index) {
+            if (confirm('Delete this work type?')) {
+                workTypes.splice(index, 1);
+                saveWorkTypes();
+                renderWorkTypesTable();
+            }
+        }
+        
+        function renderWorkTypesTable() {
+            const tbody = document.getElementById('workTypesTable');
+            tbody.innerHTML = workTypes.map((wt, i) => 
+                '<tr><td>' + wt.name + '</td><td>' + wt.days + '</td><td>$' + wt.price.toLocaleString() + '</td><td><button class="btn btn-delete" onclick="deleteWorkType(' + i + ')">Delete</button></td></tr>'
+            ).join('');
+        }
+        
+        function getPriceConfig(workTypeName) {
+            const wt = workTypes.find(w => w.name === workTypeName);
+            return wt ? { days: wt.days, price: wt.price } : { days: 3, price: 0 };
+        }
+        
+        // Work Items
+        function addWorkItem(data = null) {
+            workItemCounter++;
+            const container = document.getElementById('workItemsContainer');
+            const div = document.createElement('div');
+            div.className = 'work-item';
+            div.id = 'workItem_' + workItemCounter;
+            
+            let config = { days: 3, price: 0 };
+            if (data && data.workType) config = getPriceConfig(data.workType);
+            
+            const receivedDate = document.getElementById('receivedDate').value;
+            let completionDate = '', shipDate = '';
+            if (receivedDate) {
+                let d = new Date(receivedDate); d.setDate(d.getDate() + config.days); completionDate = d.toISOString().split('T')[0];
+                d = new Date(completionDate); d.setDate(d.getDate() + 1); shipDate = d.toISOString().split('T')[0];
+            }
+            
+            let workTypeOptions = '<option value="">Select...</option>';
+            workTypes.forEach(wt => { workTypeOptions += '<option value="' + wt.name + '" ' + (data && data.workType === wt.name ? 'selected' : '') + '>' + wt.name + '</option>'; });
+            
+            div.innerHTML = '<div class="work-item-header"><span class="work-item-title">Work Item #' + workItemCounter + '</span><button class="btn btn-delete" onclick="removeWorkItem(' + workItemCounter + ')">✕ Remove</button></div>' +
+                '<div class="form-grid"><div class="form-group"><label>Work Type (工件類型)</label><select class="work-type-select" data-id="' + workItemCounter + '" onchange="updateWorkItemParams(' + workItemCounter + ')">' + workTypeOptions + '</select></div>' +
+                '<div class="form-group"><label>Quantity (數量)</label><input type="number" class="work-qty" data-id="' + workItemCounter + '" value="' + (data ? data.quantity : 1) + '" min="1" onchange="updateOrderTotal()"></div>' +
+                '<div class="form-group"><label>Unit Price (單價)</label><input type="number" class="work-price" data-id="' + workItemCounter + '" value="' + (data ? data.unitPrice : config.price) + '" onchange="updateOrderTotal()"></div>' +
+                '<div class="form-group"><label>Internal Completion (內部完工日)</label><input type="date" class="work-completion" data-id="' + workItemCounter + '" value="' + (data ? data.completionDate : completionDate) + '" onchange="updateShipDate(' + workItemCounter + ')"></div>' +
+                '<div class="form-group"><label>Ship Date (出貨日)</label><input type="date" class="work-ship" data-id="' + workItemCounter + '" value="' + (data ? data.shipDate : shipDate) + '" readonly></div></div>' +
+                '<div class="custom-params" id="customParams_' + workItemCounter + '"></div>' +
+                '<div class="price-display" id="priceDisplay_' + workItemCounter + '">Subtotal: $' + ((data ? data.unitPrice * data.quantity : config.price)).toLocaleString() + '</div>';
+            
+            container.appendChild(div);
+            if (data && data.customParams) { setTimeout(() => updateWorkItemParams(workItemCounter, data.customParams), 100); }
+            updateOrderTotal();
+        }
+        
+        function removeWorkItem(id) { document.getElementById('workItem_' + id).remove(); updateOrderTotal(); }
+        
+        function updateWorkItemParams(id, existingParams) {
+            const select = document.querySelector('#workItem_' + id + ' .work-type-select');
+            const workType = select.value;
+            const container = document.getElementById('customParams_' + id);
+            const priceInput = document.querySelector('#workItem_' + id + ' .work-price');
+            
+            const config = getPriceConfig(workType);
+            priceInput.value = config.price;
+            
+            const receivedDate = document.getElementById('receivedDate').value;
+            if (receivedDate && config.days) {
+                let d = new Date(receivedDate); d.setDate(d.getDate() + config.days);
+                document.querySelector('#workItem_' + id + ' .work-completion').value = d.toISOString().split('T')[0];
+                updateShipDate(id);
+            }
+            
+            container.innerHTML = '';
+            if (workType) {
+                let html = '<div class="custom-params-grid"><div class="form-group"><label>Tooth Position (牙位)</label><input type="text" class="custom-param" data-param="toothPosition" value="' + (existingParams ? (existingParams.toothPosition || '') : '') + '"></div>';
+                html += '<div class="form-group"><label>Shade (顏色)</label><input type="text" class="custom-param" data-param="shade" value="' + (existingParams ? (existingParams.shade || '') : '') + '"></div></div>';
+                container.innerHTML = html;
+            }
+            updateOrderTotal();
+        }
+        
+        function updateShipDate(id) {
+            const completionDate = document.querySelector('#workItem_' + id + ' .work-completion').value;
+            const shipInput = document.querySelector('#workItem_' + id + ' .work-ship');
+            if (completionDate) { let d = new Date(completionDate); d.setDate(d.getDate() + 1); shipInput.value = d.toISOString().split('T')[0]; }
+        }
+        
+        function updateAllWorkItemDates() {
+            const receivedDate = document.getElementById('receivedDate').value;
+            if (!receivedDate) return;
+            document.querySelectorAll('.work-item').forEach(item => {
+                const id = item.id.split('_')[1];
+                const workType = item.querySelector('.work-type-select').value;
+                const config = getPriceConfig(workType);
+                if (config.days) { let d = new Date(receivedDate); d.setDate(d.getDate() + config.days); item.querySelector('.work-completion').value = d.toISOString().split('T')[0]; updateShipDate(id); }
+            });
+        }
+        
+        function updateOrderTotal() {
+            let total = 0;
+            document.querySelectorAll('.work-item').forEach(item => {
+                const qty = parseInt(item.querySelector('.work-qty').value) || 0;
+                const price = parseInt(item.querySelector('.work-price').value) || 0;
+                const subtotal = qty * price;
+                total += subtotal;
+                const id = item.id.split('_')[1];
+                document.getElementById('priceDisplay_' + id).textContent = 'Subtotal: $' + subtotal.toLocaleString();
+            });
+            document.getElementById('orderTotal').textContent = 'Order Total: $' + total.toLocaleString();
+        }
+        
+        // Cases
+        function addCase() {
+            const clinicName = document.getElementById('clinicName').value;
+            if (!clinicName) { alert('Please enter clinic name'); return; }
+            
+            const workItems = [];
+            let earliestCompletion = null, latestShip = null;
+            
+            document.querySelectorAll('.work-item').forEach(item => {
+                const workType = item.querySelector('.work-type-select').value;
+                if (!workType) return;
+                
+                const customParams = {};
+                item.querySelectorAll('.custom-param').forEach(input => { customParams[input.dataset.param] = input.value; });
+                
+                const completionDate = item.querySelector('.work-completion').value;
+                const shipDate = item.querySelector('.work-ship').value;
+                if (completionDate && (!earliestCompletion || completionDate < earliestCompletion)) earliestCompletion = completionDate;
+                if (shipDate && (!latestShip || shipDate > latestShip)) latestShip = shipDate;
+                
+                workItems.push({ workType, quantity: parseInt(item.querySelector('.work-qty').value) || 1, unitPrice: parseInt(item.querySelector('.work-price').value) || 0, completionDate, shipDate, customParams });
+            });
+            
+            if (workItems.length === 0) { alert('Please add at least one work item'); return; }
+            
+            const totalPrice = workItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+            
+            const newCase = {
+                id: Date.now(),
+                caseSeq: document.getElementById('caseSeq').value,
+                caseDate: document.getElementById('caseDate').value,
+                clinicName,
+                doctorName: document.getElementById('doctorName').value,
+                technicianName: document.getElementById('technicianName').value,
+                receivedDate: document.getElementById('receivedDate').value,
+                workItems,
+                completionDate: earliestCompletion,
+                shipDate: latestShip,
+                totalPrice,
+                arrivalDate: document.getElementById('arrivalDate').value,
+                logistics: document.getElementById('logistics').value,
+                trackingCode: document.getElementById('trackingCode').value,
+                completed: false,
+                collected: false,
+                collectionDate: null,
+                createdAt: new Date().toISOString()
+            };
+            
+            cases.unshift(newCase);
+            saveData();
+            renderTable();
+            clearForm();
+            updateTechnicianDropdown();
+        }
+        
+        function clearForm() {
+            document.getElementById('caseSeq').value = getNextSeq();
+            document.getElementById('clinicName').value = '';
+            document.getElementById('doctorName').value = '';
+            document.getElementById('technicianName').value = '';
+            document.getElementById('arrivalDate').value = '';
+            document.getElementById('logistics').value = '';
+            document.getElementById('trackingCode').value = '';
+            document.getElementById('workItemsContainer').innerHTML = '';
+            document.getElementById('orderTotal').textContent = 'Order Total: $0';
+            addWorkItem();
+        }
+        
+        function renderTable() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const tbody = document.getElementById('caseTable');
+            
+            const filtered = cases.filter(c => (c.caseSeq && c.caseSeq.toLowerCase().includes(search)) || (c.clinicName && c.clinicName.toLowerCase().includes(search)) || (c.doctorName && c.doctorName.toLowerCase().includes(search)) || (c.technicianName && c.technicianName.toLowerCase().includes(search)) || (c.workItems && c.workItems.some(wi => wi.workType.toLowerCase().includes(search))));
+            
+            const today = new Date().toISOString().split('T')[0];
+            
+            tbody.innerHTML = filtered.map(c => {
+                const workItemsSummary = c.workItems ? c.workItems.map(wi => wi.workType + ' x' + wi.quantity).join(', ') : '-';
+                
+                // Status logic
+                let statusHtml = '';
+                if (c.completed) {
+                    statusHtml = '<span class="status-completed" title="Completed">✅</span>';
+                } else if (c.completionDate && c.completionDate < today) {
+                    statusHtml = '<span class="status-delayed" title="Delayed!">🔴</span>';
+                } else {
+                    statusHtml = '<span class="status-pending" title="Pending">⏳</span>';
+                }
+                
+                const checkboxHtml = '<input type="checkbox" class="completion-checkbox" ' + (c.completed ? 'checked' : '') + ' onchange="toggleComplete(' + c.id + ')">';
+                
+                return '<tr><td><span class="case-seq">' + (c.caseSeq || '-') + '</span></td><td>' + (c.caseDate || '-') + '</td><td>' + (c.clinicName || '-') + '</td><td>' + (c.doctorName || '-') + '</td><td>' + (c.technicianName || '-') + '</td><td>' + workItemsSummary + '</td><td class="hide-mobile">$' + (c.totalPrice ? c.totalPrice.toLocaleString() : '0') + '</td><td>' + (c.receivedDate || '-') + '</td><td>' + (c.completionDate || '-') + '</td><td>' + statusHtml + '</td><td>' + (c.shipDate || '-') + '</td><td>' + (c.arrivalDate || '-') + '</td><td class="hide-mobile">' + (c.logistics || '-') + '</td><td>' + checkboxHtml + '<button class="btn btn-delete" onclick="deleteCase(' + c.id + ')">Delete</button></td></tr>';
+            }).join('');
+        }
+        
+        function deleteCase(id) { if (confirm('Confirm delete?')) { cases = cases.filter(c => c.id !== id); saveData(); renderTable(); updateTechnicianDropdown(); } }
+        
+        function toggleComplete(id) {
+            const caseData = cases.find(c => c.id === id);
+            if (caseData) {
+                caseData.completed = !caseData.completed;
+                saveData();
+                renderTable();
+                updateTechnicianDropdown();
+            }
+        }
+        
+        // Invoice - Search
+        function searchCasesForInvoice() {
+            const query = document.getElementById('invoiceSearch').value.toLowerCase().trim();
+            const resultsDiv = document.getElementById('searchResults');
+            
+            if (!query) {
+                resultsDiv.innerHTML = '';
+                return;
+            }
+            
+            const results = cases.filter(c => 
+                (c.caseSeq && c.caseSeq.toLowerCase().includes(query)) || 
+                (c.clinicName && c.clinicName.toLowerCase().includes(query))
+            ).slice(0, 10);
+            
+            if (results.length === 0) {
+                resultsDiv.innerHTML = '<div class="search-result-item" style="color:#999;">No cases found</div>';
+                return;
+            }
+            
+            resultsDiv.innerHTML = results.map(c => {
+                const workSummary = c.workItems ? c.workItems.map(wi => wi.workType + ' x' + wi.quantity).join(', ') : '';
+                return '<div class="search-result-item" onclick="selectCaseForInvoice(' + c.id + ')">' +
+                    '<span class="case-seq">' + (c.caseSeq || '-') + '</span> - ' + (c.clinicName || 'Untitled') + '<br>' +
+                    '<small style="color:#666;">' + workSummary + ' | $' + (c.totalPrice || 0).toLocaleString() + '</small>' +
+                    '</div>';
+            }).join('');
+        }
+        
+        function selectCaseForInvoice(caseId) {
+            const caseData = cases.find(c => c.id === caseId);
+            if (!caseData) return;
+            
+            document.getElementById('selectedCaseId').value = caseId;
+            const workSummary = caseData.workItems ? caseData.workItems.map(wi => wi.workType + ' x' + wi.quantity).join(', ') : '';
+            document.getElementById('selectedCaseInfo').value = (caseData.caseSeq || '') + ' - ' + (caseData.clinicName || '') + ' (' + workSummary + ')';
+            document.getElementById('billTo').value = caseData.clinicName || '';
+            document.getElementById('searchResults').innerHTML = '';
+            document.getElementById('invoiceSearch').value = '';
+        }
+        
+        function generateInvoice() {
+            const caseId = parseInt(document.getElementById('selectedCaseId').value);
+            if (!caseId) { alert('Please search and select a case'); return; }
+            
+            const caseData = cases.find(c => c.id === caseId);
+            if (!caseData || !caseData.workItems) { alert('No work items found'); return; }
+            
+            const invoiceDate = document.getElementById('invoiceDate').value || new Date().toISOString().split('T')[0];
+            const invoiceNo = document.getElementById('invoiceNo').value || 'INV-' + Date.now();
+            const billTo = document.getElementById('billTo').value || caseData.clinicName || '';
+            const billToAddress = document.getElementById('billToAddress').value || '';
+            const fromName = document.getElementById('fromName').value || 'Dental Lab';
+            const fromAddress = document.getElementById('fromAddress').value || '';
+            const paymentInfo = document.getElementById('paymentInfo').value || '';
+            
+            let subtotal = 0;
+            let itemsHtml = '';
+            caseData.workItems.forEach((wi, i) => {
+                const amount = wi.quantity * wi.unitPrice;
+                subtotal += amount;
+                const params = Object.entries(wi.customParams || {}).filter(([k,v]) => v).map(([k,v]) => v).join(', ');
+                itemsHtml += '<tr><td>' + (i+1) + '</td><td class="text-left">' + wi.workType + (params ? ' (' + params + ')' : '') + '</td><td>' + wi.quantity + '</td><td>$' + wi.unitPrice.toLocaleString() + '</td><td>$' + amount.toLocaleString() + '</td></tr>';
+            });
+            
+            const tax = subtotal * 0.1;
+            const total = subtotal + tax;
+            
+            // Calculate commission if technician assigned
+            let commissionHtml = '';
+            if (caseData.technicianName) {
+                const commissionRate = getTechnicianCommission(caseData.technicianName);
+                const commissionAmount = total * (commissionRate / 100);
+                if (commissionRate > 0) {
+                    commissionHtml = '<div><strong>Technician:</strong> ' + caseData.technicianName + '</div><div><strong>Commission (' + commissionRate + '%):</strong> $' + commissionAmount.toLocaleString() + '</div>';
+                }
+            }
+            
+            const doc = document.getElementById('invoiceDoc');
+            doc.innerHTML = '<div class="invoice-doc-header"><div class="invoice-doc-title">INVOICE</div><div class="invoice-doc-info"><div><strong>Case #:</strong> ' + (caseData.caseSeq || '-') + '</div><div><strong>Date:</strong> ' + invoiceDate + '</div><div><strong>Invoice No.:</strong> ' + invoiceNo + '</div></div></div>' +
+                '<div class="invoice-doc-parties"><div class="invoice-doc-party"><h4>Bill To (收款方)</h4><div><strong>' + billTo + '</strong></div><div>' + billToAddress + '</div></div><div class="invoice-doc-party"><h4>From (開立方)</h4><div><strong>' + fromName + '</strong></div><div>' + fromAddress + '</div></div></div>' +
+                '<table class="invoice-doc-table"><thead><tr><th>No.</th><th>Item / Description</th><th>Qty</th><th>Unit Price</th><th>Amount</th></tr></thead><tbody>' + itemsHtml + '</tbody></table>' +
+                '<div class="invoice-doc-summary"><div><strong>Subtotal:</strong> $' + subtotal.toLocaleString() + '</div><div><strong>Tax (10%):</strong> $' + tax.toLocaleString() + '</div><div class="total"><strong>TOTAL:</strong> $' + total.toLocaleString() + '</div>' + commissionHtml + '</div>' +
+                (paymentInfo ? '<div style="margin-top:30px;padding:15px;background:#f8f9fa;border-radius:8px;"><h4 style="margin-bottom:8px;">Payment Destination (振込先)</h4><p>' + paymentInfo + '</p></div>' : '');
+            
+            document.getElementById('invoicePreview').style.display = 'block';
+        }
+        
+        function printInvoice() {
+            const content = document.getElementById('invoiceDoc').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write('<html><head><title>Invoice</title><style>body{font-family:Arial,sans-serif;padding:20px;} .invoice-doc-header{display:flex;justify-content:space-between;border-bottom:2px solid #333;padding-bottom:20px;margin-bottom:20px;} .invoice-doc-title{font-size:28px;font-weight:bold;} .invoice-doc-info{text-align:right;} .invoice-doc-parties{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-bottom:20px;} .invoice-doc-party{border:1px solid #ddd;padding:15px;border-radius:8px;} .invoice-doc-party h4{margin-bottom:8px;} .invoice-doc-table{width:100%;border-collapse:collapse;margin-bottom:20px;} .invoice-doc-table th{background:#f0f0f0;border:1px solid #ddd;padding:10px;text-align:center;} .invoice-doc-table td{border:1px solid #ddd;padding:10px;text-align:center;} .invoice-doc-table td.text-left{text-align:left;} .invoice-doc-summary{text-align:right;} .invoice-doc-summary div{margin-bottom:5px;} .invoice-doc-summary .total{font-size:18px;font-weight:bold;}</style></head><body>' + content + '</body></html>');
+            printWindow.document.close();
+            printWindow.print();
+        }
+        
+        // Collection Summary - 請款細項
+        function generateCollectionSummary() {
+            const fromDate = document.getElementById('collectionFromDate').value;
+            const toDate = document.getElementById('collectionToDate').value;
+            
+            if (!fromDate || !toDate) { alert('請選擇日期範圍 / Please select date range'); return; }
+            
+            // Filter cases by date range (using caseDate)
+            const filteredCases = cases.filter(c => c.caseDate && c.caseDate >= fromDate && c.caseDate <= toDate);
+            
+            if (filteredCases.length === 0) {
+                document.getElementById('collectionResults').innerHTML = '<p style="color:#666;">該時間範圍內沒有案件 / No cases in this period</p>';
+                return;
+            }
+            
+            // Group by clinic
+            const clinicTotals = {};
+            filteredCases.forEach(c => {
+                const clinic = c.clinicName || 'Unknown';
+                if (!clinicTotals[clinic]) {
+                    clinicTotals[clinic] = { total: 0, paid: 0, cases: [] };
+                }
+                clinicTotals[clinic].total += c.totalPrice || 0;
+                if (c.collected) clinicTotals[clinic].paid += c.totalPrice || 0;
+                clinicTotals[clinic].cases.push(c);
+            });
+            
+            // Build summary HTML
+            const today = new Date().toISOString().split('T')[0];
+            
+            let html = '<h4 style="margin-top:20px;margin-bottom:12px;">' + fromDate + ' 至 ' + toDate + ' 請款明細</h4>';
+            html += '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr style="background:#f8f9fa;"><th style="padding:10px;border-bottom:1px solid #ddd;text-align:left;">診所 Clinic</th><th style="padding:10px;border-bottom:1px solid #ddd;">案件數 Cases</th><th style="padding:10px;border-bottom:1px solid #ddd;text-align:right;">金額 Amount</th><th style="padding:10px;border-bottom:1px solid #ddd;text-align:right;">已收 Paid</th><th style="padding:10px;border-bottom:1px solid #ddd;">Action</th></tr></thead><tbody>';
+            
+            let grandTotal = 0, grandPaid = 0;
+            Object.keys(clinicTotals).sort().forEach(clinic => {
+                const data = clinicTotals[clinic];
+                grandTotal += data.total;
+                grandPaid += data.paid;
+                html += '<tr><td style="padding:10px;border-bottom:1px solid #ddd;"><strong>' + clinic + '</strong></td><td style="padding:10px;border-bottom:1px solid #ddd;text-align:center;">' + data.cases.length + '</td><td style="padding:10px;border-bottom:1px solid #ddd;text-align:right;">$' + data.total.toLocaleString() + '</td><td style="padding:10px;border-bottom:1px solid #ddd;text-align:right;">$' + data.paid.toLocaleString() + '</td><td style="padding:10px;border-bottom:1px solid #ddd;text-align:center;"><button class="btn btn-primary" style="padding:6px 12px;font-size:11px;" onclick="showClinicDetails(\'' + clinic + '\', \'' + fromDate + '\', \'' + toDate + '\')">詳情 Details</button></td></tr>';
+            });
+            
+            html += '<tr style="background:#e8f5e9;"><td style="padding:10px;border-bottom:1px solid #ddd;"><strong>總計 Total</strong></td><td style="padding:10px;border-bottom:1px solid #ddd;text-align:center;">' + filteredCases.length + '</td><td style="padding:10px;border-bottom:1px solid #ddd;text-align:right;font-size:16px;font-weight:bold;">$' + grandTotal.toLocaleString() + '</td><td style="padding:10px;border-bottom:1px solid #ddd;text-align:right;font-size:16px;font-weight:bold;">$' + grandPaid.toLocaleString() + '</td><td></td></tr>';
+            html += '</tbody></table>';
+            
+            document.getElementById('collectionResults').innerHTML = html;
+        }
+        
+        function showClinicDetails(clinicName, fromDate, toDate) {
+            const filteredCases = cases.filter(c => c.caseDate && c.caseDate >= fromDate && c.caseDate <= toDate && c.clinicName === clinicName);
+            
+            if (filteredCases.length === 0) return;
+            
+            const today = new Date();
+            const overdueDays = 60;
+            
+            let html = '<div style="margin-top:20px;padding:15px;background:#f8f9fa;border-radius:8px;"><h4 style="margin-bottom:12px;">' + clinicName + ' - 詳細案件 / Case Details</h4>';
+            html += '<table style="width:100%;border-collapse:collapse;font-size:11px;"><thead><tr style="background:#e9ecef;"><th style="padding:8px;border-bottom:1px solid #ddd;">✓</th><th style="padding:8px;border-bottom:1px solid #ddd;">Case #</th><th style="padding:8px;border-bottom:1px solid #ddd;">Date</th><th>Items</th><th style="padding:8px;border-bottom:1px solid #ddd;text-align:right;">Amount</th><th style="padding:8px;border-bottom:1px solid #ddd;">收款日期 Collected Date</th><th style="padding:8px;border-bottom:1px solid #ddd;">狀態 Status</th></tr></thead><tbody>';
+            
+            filteredCases.forEach(c => {
+                const items = c.workItems ? c.workItems.map(wi => wi.workType + ' x' + wi.quantity).join(', ') : '-';
+                const caseDate = new Date(c.caseDate);
+                const daysSinceCase = Math.floor((today - caseDate) / (1000 * 60 * 60 * 24));
+                const isOverdue = daysSinceCase > 60 && !c.collected;
+                const rowStyle = isOverdue ? 'background-color:#ffebee;' : '';
+                const statusText = c.collected ? '<span style="color:green;">✅ 已收</span>' : (isOverdue ? '<span style="color:red;font-weight:bold;">🔴 逾期 ' + daysSinceCase + '天</span>' : '<span style="color:orange;">⏳ 待收 ' + daysSinceCase + '天</span>');
+                
+                html += '<tr style="' + rowStyle + '"><td style="padding:8px;border-bottom:1px solid #ddd;text-align:center;"><input type="checkbox" class="collection-checkbox" ' + (c.collected ? 'checked' : '') + ' onchange="toggleCollection(' + c.id + ')"></td><td style="padding:8px;border-bottom:1px solid #ddd;">' + (c.caseSeq || '-') + '</td><td style="padding:8px;border-bottom:1px solid #ddd;">' + c.caseDate + '</td><td style="padding:8px;border-bottom:1px solid #ddd;">' + items + '</td><td style="padding:8px;border-bottom:1px solid #ddd;text-align:right;">$' + (c.totalPrice || 0).toLocaleString() + '</td><td style="padding:8px;border-bottom:1px solid #ddd;"><input type="date" value="' + (c.collectionDate || '') + '" onchange="updateCollectionDate(' + c.id + ', this.value)" style="padding:4px;font-size:11px;"></td><td style="padding:8px;border-bottom:1px solid #ddd;">' + statusText + '</td></tr>';
+            });
+            
+            html += '</tbody></table></div>';
+            
+            // Append to results
+            const resultsDiv = document.getElementById('collectionResults');
+            resultsDiv.innerHTML += html;
+        }
+        
+        function toggleCollection(caseId) {
+            const caseData = cases.find(c => c.id === caseId);
+            if (caseData) {
+                caseData.collected = !caseData.collected;
+                if (caseData.collected && !caseData.collectionDate) {
+                    caseData.collectionDate = new Date().toISOString().split('T')[0];
+                }
+                saveData();
+                // Refresh the summary
+                generateCollectionSummary();
+            }
+        }
+        
+        function updateCollectionDate(caseId, date) {
+            const caseData = cases.find(c => c.id === caseId);
+            if (caseData) {
+                caseData.collectionDate = date;
+                if (date) {
+                    caseData.collected = true;
+                } else {
+                    caseData.collected = false;
+                }
+                saveData();
+                generateCollectionSummary();
+            }
+        }
+        
+        // Initial load
+        renderTable();
+        addWorkItem();
+        document.getElementById('caseSeq').value = getNextSeq();
+        updateTechnicianDropdown();
+    </script>
+</body>
+</html>
